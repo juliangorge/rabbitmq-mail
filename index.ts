@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
 })
 
 async function consumeMessages() {
-    const connection = await amqp.connect('amqp://' + process.env.RABBITMQ_SERVER) // URL de conexión a tu servidor RabbitMQ
+    const connection = await amqp.connect('amqp://' + process.env.RABBITMQ_USER + ':' + process.env.RABBITMQ_PASS + '@' + process.env.RABBITMQ_SERVER) // URL de conexión a tu servidor RabbitMQ
 
     const channel = await connection.createChannel()
 
