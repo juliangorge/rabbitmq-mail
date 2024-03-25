@@ -1,13 +1,12 @@
 version: '3.8'
-
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    hostname: rmq
+  rabbitmq-mail:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-      RABBITMQ_MANAGEMENT_BIND_IP: 0.0.0.0
+      NODE_ENV: development
