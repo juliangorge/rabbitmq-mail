@@ -44,7 +44,7 @@ async function consumeMessages() {
                 if (error) {
                     console.log(`Error al enviar el correo: ${error}`)
                 } else {
-                    console.log(`Correo enviado: ${info.response}`)
+                    console.log(`Correo enviado: ${data.to}`)
                 }
             })
 
