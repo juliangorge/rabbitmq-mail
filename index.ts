@@ -30,7 +30,7 @@ async function consumeMessages() {
         if (msg !== null) {
             const message = msg.content.toString()
             const data = JSON.parse(message)
-            console.log(`[x] Recibido: ${message}`)
+            console.log(`[o] Recibido: ${data.to} > ${data.subject}`)
 
             const mailOptions = {
                 from: data.from,
@@ -42,9 +42,9 @@ async function consumeMessages() {
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.log(`Error al enviar el correo: ${error}`)
+                    console.log(`[x] Error al enviar el correo: ${error}`)
                 } else {
-                    console.log(`Correo enviado: ${data.to}`)
+                    console.log(`[o] Correo enviado: ${data.to} > ${data.subject}`)
                 }
             })
 
