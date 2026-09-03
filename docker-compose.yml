@@ -4,8 +4,11 @@ services:
     hostname: rabbitmq
     profiles: [rabbit]
     ports:
-      - "${RABBITMQ_PORT:-5672}:5672"
-      - "15672:15672"
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+      # docker0 gateway IP: lets other containers reach RabbitMQ via
+      # host.docker.internal without exposing the port to the internet.
+      - "172.17.0.1:${RABBITMQ_PORT:-5672}:5672"
+      - "127.0.0.1:15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}

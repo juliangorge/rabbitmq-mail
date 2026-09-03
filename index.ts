@@ -42,7 +42,7 @@ async function consumeMessages() {
   const channel = await connection.createChannel();
 
   const queueName = 'email_queue';
-  await channel.assertQueue(queueName, { durable: false });
+  await channel.assertQueue(queueName, { durable: true });
 
   console.log(
     `[*] Esperando mensajes en la cola ${queueName}. Para salir, presiona CTRL+C`,
