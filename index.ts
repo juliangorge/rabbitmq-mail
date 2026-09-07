@@ -37,7 +37,7 @@ async function consumeMessages() {
       process.env.RABBITMQ_SERVER +
       ':' +
       process.env.RABBITMQ_PORT,
-  ); // URL de conexión a tu servidor RabbitMQ
+  ); // Connection URL to your RabbitMQ server
 
   const channel = await connection.createChannel();
 
@@ -45,7 +45,7 @@ async function consumeMessages() {
   await channel.assertQueue(queueName, { durable: true });
 
   console.log(
-    `[*] Esperando mensajes en la cola ${queueName}. Para salir, presiona CTRL+C`,
+    `[*] Waiting for messages in queue ${queueName}. To exit, press CTRL+C`,
   );
 
   channel.consume(
@@ -59,22 +59,22 @@ async function consumeMessages() {
           data = JSON.parse(message);
         } catch (error) {
           console.log(
-            `[x] Mensaje con formato inválido (JSON malformado): ${message}`,
+            `[x] Invalid message format (malformed JSON): ${message}`,
           );
-          console.log(`[x] Detalle del error: ${error}`);
+          console.log(`[x] Error details: ${error}`);
           channel.nack(msg, false, false);
           return;
         }
 
         if (!data.to || !data.subject) {
           console.log(
-            `[x] Mensaje con formato inválido (faltan campos requeridos 'to'/'subject'): ${message}`,
+            `[x] Invalid message format (missing required fields 'to'/'subject'): ${message}`,
           );
           channel.nack(msg, false, false);
           return;
         }
 
-        console.log(`[o] Recibido: ${data.to} > ${data.subject}`);
+        console.log(`[o] Received: ${data.to} > ${data.subject}`);
 
         const smtp = {
           host: data.smtpHost || defaultSmtp.host,
@@ -94,9 +94,9 @@ async function consumeMessages() {
           mailOptions,
           (error: Error | null, info: SentMessageInfo) => {
             if (error) {
-              console.log(`[x] Error al enviar el correo: ${error}`);
+              console.log(`[x] Error sending email: ${error}`);
             } else {
-              console.log(`[o] Correo enviado: ${data.to} > ${data.subject}`);
+              console.log(`[o] Email sent: ${data.to} > ${data.subject}`);
             }
           },
         );
