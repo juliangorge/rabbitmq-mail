@@ -53,7 +53,27 @@ async function consumeMessages() {
     async (msg: ConsumeMessage | null) => {
       if (msg !== null) {
         const message = msg.content.toString();
-        const data = JSON.parse(message);
+
+        let data;
+        try {
+          data = JSON.parse(message);
+        } catch (error) {
+          console.log(
+            `[x] Mensaje con formato inválido (JSON malformado): ${message}`,
+          );
+          console.log(`[x] Detalle del error: ${error}`);
+          channel.nack(msg, false, false);
+          return;
+        }
+
+        if (!data.to || !data.subject) {
+          console.log(
+            `[x] Mensaje con formato inválido (faltan campos requeridos 'to'/'subject'): ${message}`,
+          );
+          channel.nack(msg, false, false);
+          return;
+        }
+
         console.log(`[o] Recibido: ${data.to} > ${data.subject}`);
 
         const smtp = {
