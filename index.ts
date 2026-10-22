@@ -42,7 +42,9 @@ async function consumeMessages() {
   const channel = await connection.createChannel();
 
   const queueName = 'email_queue';
-  await channel.assertQueue(queueName, { durable: true });
+  // Must match the PHP producer (juliangorge/rabbitmq-sender declares queues
+  // non-durable); a mismatch makes RabbitMQ reject the declare (PRECONDITION_FAILED).
+  await channel.assertQueue(queueName, { durable: false });
 
   console.log(
     `[*] Waiting for messages in queue ${queueName}. To exit, press CTRL+C`,
