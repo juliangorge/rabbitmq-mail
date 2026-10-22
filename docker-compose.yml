@@ -24,6 +24,9 @@ services:
 
   mail:
     build: .
+    container_name: rabbitmq-mail
+    # Broker runs outside this compose file (bound to 127.0.0.1/172.17.0.1 only)
+    network_mode: host
     env_file: .env
     environment:
       RABBITMQ_SERVER: ${RABBITMQ_SERVER:-rabbitmq}
