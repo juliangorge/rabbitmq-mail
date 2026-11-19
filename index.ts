@@ -27,6 +27,29 @@ function createTransporter(smtp: { host: string; user: string; pass: string }) {
   });
 }
 
+/**
+ * Si la cola ya existe la usa tal cual (durable o no); si no existe, la crea durable.
+ *
+ * Declarar con otros atributos que los de una cola existente hace que RabbitMQ
+ * rechace el declare (PRECONDITION_FAILED). checkQueue (declare pasivo) sólo
+ * verifica que exista, así este consumidor convive con la cola no durable vieja
+ * mientras se migra. Misma lógica que juliangorge/rabbitmq-sender (productor PHP).
+ *
+ * El chequeo va en un canal descartable: si la cola no existe, el broker cierra
+ * ese canal (404), y un canal sin listener de 'error' tiraría el proceso.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function ensureQueue(connection: any, channel: any, queue: string) {
+  const probe = await connection.createChannel();
+  probe.on('error', () => {});
+  try {
+    await probe.checkQueue(queue);
+    await probe.close();
+  } catch {
+    await channel.assertQueue(queue, { durable: true });
+  }
+}
+
 async function consumeMessages() {
   const connection = await amqp.connect(
     'amqp://' +
@@ -42,9 +65,7 @@ async function consumeMessages() {
   const channel = await connection.createChannel();
 
   const queueName = 'email_queue';
-  // Must match the PHP producer (juliangorge/rabbitmq-sender declares queues
-  // non-durable); a mismatch makes RabbitMQ reject the declare (PRECONDITION_FAILED).
-  await channel.assertQueue(queueName, { durable: false });
+  await ensureQueue(connection, channel, queueName);
 
   console.log(
     `[*] Waiting for messages in queue ${queueName}. To exit, press CTRL+C`,
