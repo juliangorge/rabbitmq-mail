@@ -1,7 +1,9 @@
 services:
   rabbitmq:
-    image: rabbitmq:4-management
-    hostname: rabbitmq
+    # Versión fija: subir a mano revisando el camino de upgrade de RabbitMQ.
+    image: rabbitmq:4.4.1-management
+    # El nombre de nodo (rabbit@rmq) sale del hostname y está atado a los datos del volumen.
+    hostname: rmq
     profiles: [rabbit]
     ports:
       - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
@@ -14,8 +16,11 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf.d/90-octopy.conf:/etc/rabbitmq/conf.d/90-octopy.conf:ro
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      # Como usuario rabbitmq: si corre como root antes del arranque crea la
+      # .erlang.cookie con dueño root y el nodo no puede leerla (eacces).
+      test: ["CMD", "gosu", "rabbitmq", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
